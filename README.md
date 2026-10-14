@@ -18,6 +18,11 @@ My.NodeType:
             # only allow editing one property for inline/block spacing
             lockInline: false
             lockBlock: false
+            # optional limits per side, available as {inline,block}{Start,End}{Minimum,Maximum}
+            # values outside the range are clamped when editing
+            blockStartMinimum: 0
+            blockStartMaximum: 200
+            inlineEndMinimum: 0
 ```
 Property returns 
 ```ts

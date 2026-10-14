@@ -8,11 +8,17 @@ type BoxModelSizing = {
     inlineEnd: number;
 }
 
+type Property = keyof BoxModelSizing;
+
 type BoxModelEditorOptions = {
     lockInline: boolean;
     lockBlock: boolean;
     disabled: boolean;
+} & {
+    [K in `${Property}${'Minimum' | 'Maximum'}`]: number;
 }
+
+type Limits = { min?: number, max?: number };
 
 type BoxModelEditorProps = {
     id: string;
@@ -25,7 +31,7 @@ type BoxModelEditorProps = {
 
 type Side = 'top' | 'right' | 'bottom' | 'left';
 
-const sides: ReadonlyArray<{ side: Side, property: keyof BoxModelSizing, label: string }> = [
+const sides: ReadonlyArray<{ side: Side, property: Property, label: string }> = [
     { side: 'top', property: 'blockStart', label: 'Top' },
     { side: 'right', property: 'inlineEnd', label: 'Right' },
     { side: 'bottom', property: 'blockEnd', label: 'Bottom' },
@@ -33,7 +39,7 @@ const sides: ReadonlyArray<{ side: Side, property: keyof BoxModelSizing, label: 
 ];
 
 /** Sides whose value is mirrored from the opposite side when the axis is locked */
-const mirrors: Partial<Record<keyof BoxModelSizing, keyof BoxModelSizing>> = {
+const mirrors: Partial<Record<Property, Property>> = {
     blockEnd: 'blockStart',
     inlineEnd: 'inlineStart',
 };
@@ -47,13 +53,24 @@ const parseNumber = (input: string): number | null => {
     return Number.isFinite(nr) ? nr : null;
 };
 
+const toLimit = (option: unknown): number | undefined =>
+    typeof option === 'number' && Number.isFinite(option) ? option : undefined;
+
+const clamp = (nr: number, { min, max }: Limits): number =>
+    Math.min(max ?? Infinity, Math.max(min ?? -Infinity, nr));
+
 export const BoxModelEditor: React.FunctionComponent<BoxModelEditorProps> = ({ value, options, commit, i18nRegistry, disabled, id }) => {
     const lockInline = options?.lockInline === true;
     const lockBlock = options?.lockBlock === true;
     const isDisabled = disabled === true || options?.disabled === true;
 
-    const isLocked = (property: keyof BoxModelSizing) =>
+    const isLocked = (property: Property) =>
         (lockBlock && property === 'blockEnd') || (lockInline && property === 'inlineEnd');
+
+    const limits = (property: Property): Limits => ({
+        min: toLimit(options?.[`${property}Minimum`]),
+        max: toLimit(options?.[`${property}Maximum`]),
+    });
 
     const sizing = useMemo<BoxModelSizing>(() => {
         const blockStart = value?.blockStart ?? 0;
@@ -66,11 +83,11 @@ export const BoxModelEditor: React.FunctionComponent<BoxModelEditorProps> = ({ v
         };
     }, [ value, lockBlock, lockInline ]);
 
-    const update = (property: keyof BoxModelSizing, nr: number) => {
-        const next = { ...sizing, [property]: nr };
-        for (const [ target, source ] of Object.entries(mirrors) as Array<[keyof BoxModelSizing, keyof BoxModelSizing]>) {
+    const update = (property: Property, nr: number) => {
+        const next = { ...sizing, [property]: clamp(nr, limits(property)) };
+        for (const [ target, source ] of Object.entries(mirrors) as Array<[Property, Property]>) {
             if (isLocked(target)) {
-                next[target] = next[source];
+                next[target] = clamp(next[source], limits(target));
             }
         }
         commit(next);
@@ -86,6 +103,7 @@ export const BoxModelEditor: React.FunctionComponent<BoxModelEditorProps> = ({ v
                     side={side}
                     label={i18nRegistry.translate(`Prgfx.Neos.SizingEditor:Main:side.${side}`, label)}
                     value={sizing[property]}
+                    {...limits(property)}
                     locked={isLocked(property)}
                     disabled={isDisabled}
                     onChange={nr => update(property, nr)}
@@ -101,12 +119,14 @@ type SideInputProps = {
     side: Side;
     label: string;
     value: number;
+    min?: number;
+    max?: number;
     locked: boolean;
     disabled: boolean;
     onChange: (value: number) => void;
 }
 
-const SideInput: React.FunctionComponent<SideInputProps> = ({ id, side, label, value, locked, disabled, onChange }) => {
+const SideInput: React.FunctionComponent<SideInputProps> = ({ id, side, label, value, min, max, locked, disabled, onChange }) => {
     // keeps the raw input while typing, so intermediate states like "" or "-" are possible
     const [ draft, setDraft ] = useState<string | null>(null);
     const readOnly = disabled || locked;
@@ -141,6 +161,8 @@ const SideInput: React.FunctionComponent<SideInputProps> = ({ id, side, label, v
             aria-label={label}
             title={locked ? undefined : label}
             value={draft ?? String(value)}
+            min={min}
+            max={max}
             readOnly={readOnly}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
