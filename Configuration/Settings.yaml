@@ -1,0 +1,15 @@
+Neos:
+  Neos:
+    userInterface:
+      translation:
+        autoInclude:
+          'Prgfx.Neos.SizingEditor':
+            - 'Main'
+    Ui:
+      resources:
+        javascript:
+          'Prgx.Neos.SizingEditor':
+            resource: 'resource://Prgfx.Neos.SizingEditor/Public/Plugin/Plugin.js'
+        stylesheets:
+          'Prgx.Neos.SizingEditor':
+            resource: 'resource://Prgfx.Neos.SizingEditor/Public/Plugin/Plugin.css'

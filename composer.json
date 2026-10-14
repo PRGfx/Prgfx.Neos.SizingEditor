@@ -1,0 +1,14 @@
+{
+    "name": "prgfx/neos-sizingeditor",
+    "keywords": ["neoscms", "neos", "inspector", "boxmodel"],
+    "description": "Neos CMS sizing editor",
+    "type": "neos-package",
+    "extra": {
+        "neos": {
+            "package-key": "Prgfx.Neos.SizingEditor"
+        }
+    },
+    "require": {
+        "neos/neos-ui": "^8 || ^9"
+    }
+}

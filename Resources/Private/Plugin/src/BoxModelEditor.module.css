@@ -1,0 +1,94 @@
+/*
+ * Devtools-like box model: the outer box is the spacing area with one input per side,
+ * the inner box represents the element's content.
+ */
+.box {
+    --band: 36px;
+
+    display: grid;
+    grid-template-columns: minmax(var(--band), auto) 1fr minmax(var(--band), auto);
+    grid-template-rows: var(--band) minmax(32px, 1fr) var(--band);
+    padding-inline: var(--spacing-Quarter);
+    border: 1px dashed var(--colors-ContrastBright);
+    background-color: color-mix(in srgb, var(--colors-PrimaryBlue) 12%, transparent);
+    transition: border-color var(--transition-Fast);
+
+    &:focus-within {
+        border-color: var(--colors-PrimaryBlue);
+    }
+}
+
+.content {
+    grid-row: 2;
+    grid-column: 2;
+    border: 1px solid var(--colors-ContrastBright);
+    background-color: var(--colors-ContrastDarker);
+}
+
+.input {
+    place-self: center;
+    box-sizing: border-box;
+    width: 8ch;
+    min-width: 32px;
+    height: 24px;
+    padding: 0 var(--spacing-Quarter);
+    border: 1px solid transparent;
+    border-radius: 2px;
+    background: transparent;
+    color: var(--colors-ContrastBrightest);
+    font-family: inherit;
+    font-size: var(--fontSize-Small);
+    line-height: 1;
+    text-align: center;
+    appearance: textfield;
+    -moz-appearance: textfield;
+    cursor: text;
+    transition:
+        background-color var(--transition-Fast),
+        border-color var(--transition-Fast),
+        color var(--transition-Fast);
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    &:hover {
+        border-color: var(--colors-ContrastBright);
+    }
+
+    &:focus {
+        outline: none;
+        border-color: var(--colors-PrimaryBlue);
+        background-color: var(--colors-ContrastBrightest);
+        color: var(--colors-ContrastDarkest);
+    }
+
+    &:read-only {
+        border-color: transparent;
+        background: transparent;
+        color: var(--colors-ContrastBright);
+        cursor: default;
+    }
+
+    &[data-side="top"] {
+        grid-row: 1;
+        grid-column: 2;
+    }
+
+    &[data-side="right"] {
+        grid-row: 2;
+        grid-column: 3;
+    }
+
+    &[data-side="bottom"] {
+        grid-row: 3;
+        grid-column: 2;
+    }
+
+    &[data-side="left"] {
+        grid-row: 2;
+        grid-column: 1;
+    }
+}
