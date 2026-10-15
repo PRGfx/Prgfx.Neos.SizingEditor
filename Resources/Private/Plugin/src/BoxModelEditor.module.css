@@ -3,14 +3,15 @@
  * the inner box represents the element's content.
  */
 .box {
-    --band: 36px;
+    --band-column: 54px;
+    --band-row: 2rem;
 
     display: grid;
-    grid-template-columns: minmax(var(--band), auto) 1fr minmax(var(--band), auto);
-    grid-template-rows: var(--band) minmax(32px, 1fr) var(--band);
-    padding-inline: var(--spacing-Quarter);
+    grid-template-columns: minmax(var(--band-column), auto) 1fr minmax(var(--band-column), auto);
+    grid-template-rows: var(--band-row) 4rem var(--band-row);
+    padding: var(--spacing-Half) var(--spacing-Quarter);
     border: 1px dashed var(--colors-ContrastBright);
-    background-color: color-mix(in srgb, var(--colors-PrimaryBlue) 12%, transparent);
+    background-color: var(--colors-ContrastDark);
     transition: border-color var(--transition-Fast);
 
     &:focus-within {
@@ -21,18 +22,20 @@
 .content {
     grid-row: 2;
     grid-column: 2;
+    margin: var(--spacing-Quarter);
     border: 1px solid var(--colors-ContrastBright);
     background-color: var(--colors-ContrastDarker);
 }
 
 .input {
-    place-self: center;
     box-sizing: border-box;
-    width: 8ch;
+    /* override a reset.module.css, probably coming from neos-ui */
+    appearance: textfield !important;
+    place-self: center;
     min-width: 32px;
     height: 24px;
     padding: 0 var(--spacing-Quarter);
-    border: 1px solid transparent;
+    border: 1px solid var(--colors-ContrastBright);
     border-radius: 2px;
     background: transparent;
     color: var(--colors-ContrastBrightest);
@@ -40,9 +43,6 @@
     font-size: var(--fontSize-Small);
     line-height: 1;
     text-align: center;
-    appearance: textfield;
-    -moz-appearance: textfield;
-    cursor: text;
     transition:
         background-color var(--transition-Fast),
         border-color var(--transition-Fast),
